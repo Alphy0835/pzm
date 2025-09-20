@@ -22,7 +22,7 @@
             position: absolute;
             top: 5px;
             right: 5px;
-            width: 250px;
+            width: 350px;
             background-color: #f4f7f9;
             height: calc(100vh - 10px);
             padding: 0;
@@ -45,7 +45,7 @@
             position: absolute;
             top: 0;
             left: 5px;
-            right: 260px;
+            right: 360px; /* Здесь я скорректировал значение, чтобы оставить 5px отступа от правого края */
             bottom: 5px;
             display: flex;
             flex-direction: column;
@@ -105,10 +105,10 @@
         /* Синяя зона: Скрипт */
         .script-column {
             flex-grow: 1;
-            background-color: transparent; /* Убираем фон, он будет у внутреннего блока */
+            background-color: transparent;
             margin-top: 10px;
             box-sizing: border-box;
-            overflow: hidden; /* Скрываем скролл у родителя */
+            overflow: hidden;
         }
         
         #script-content {
@@ -118,10 +118,10 @@
             box-sizing: border-box;
             color: #333;
             line-height: 1.6;
-            background-color: #ffffff; /* Белый фон для содержимого скрипта */
+            background-color: #ffffff;
             border-radius: 8px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-            overflow-y: auto; /* Добавляем скролл именно этому блоку */
+            overflow-y: auto;
         }
         
         /* Стили для кнопок возражений */
