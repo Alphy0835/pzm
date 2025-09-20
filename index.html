@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ПЗМ ТВИН НОВАЯ ЭРА</title>
+    <style>
+        /* Общие стили для всего документа */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #f4f7f9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Красная зона: Отработки (фиксированное положение) */
+        .objections-column {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            width: 250px;
+            background-color: #f4f7f9;
+            height: calc(100vh - 10px);
+            padding: 0;
+            overflow-y: auto;
+            z-index: 10;
+        }
+
+        .objections-column h2 {
+            display: none;
+        }
+
+        .buttons-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        /* Область, которая будет ограничивать желтую и синюю зоны */
+        .content-area {
+            position: absolute;
+            top: 0;
+            left: 5px;
+            right: 260px;
+            bottom: 5px;
+            display: flex;
+            flex-direction: column;
+            background-color: #f4f7f9;
+        }
+
+        /* Желтая зона: Логотип и надписи */
+        .header-section {
+            background-color: #f4f7f9;
+            padding-bottom: 1px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin: 1px 0;
+        }
+        
+        .header h1 {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #444;
+            text-align: center;
+        }
+
+        .logo-container {
+            width: 8em;
+            height: 8em;
+            transform: translateY(-2px);
+        }
+
+        .logo-image {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        /* Стиль для надписи "Чтобы увидеть отработку..." в сером окошке */
+        .instructions-box {
+            background-color: #e0e0e0;
+            border-radius: 8px;
+            padding: 5px 5px;
+            margin-top: -40px;
+            text-align: center;
+            font-style: italic;
+            color: #555;
+            width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Синяя зона: Скрипт */
+        .script-column {
+            flex-grow: 1;
+            background-color: transparent; /* Убираем фон, он будет у внутреннего блока */
+            margin-top: 10px;
+            box-sizing: border-box;
+            overflow: hidden; /* Скрываем скролл у родителя */
+        }
+        
+        #script-content {
+            width: 100%;
+            height: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+            color: #333;
+            line-height: 1.6;
+            background-color: #ffffff; /* Белый фон для содержимого скрипта */
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            overflow-y: auto; /* Добавляем скролл именно этому блоку */
+        }
+        
+        /* Стили для кнопок возражений */
+        .objection-button {
+            background-color: #ffffff;
+            border: none;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            font-size: 1.1em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+            color: #333;
+        }
+
+        .objection-button:hover {
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .objection-button.active {
+             box-shadow: 0 0 0 3px #007bff;
+        }
+
+        .objection-title {
+            pointer-events: none;
+            font-weight: bold;
+        }
+
+        .objection-body {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out, padding 0.5s ease-in-out;
+            overflow-y: auto;
+        }
+
+        .objection-button.active .objection-body {
+            max-height: 500px;
+            padding-top: 15px;
+        }
+
+        .objection-text {
+            white-space: pre-wrap;
+            text-align: left;
+            margin-bottom: 15px;
+            font-style: normal;
+        }
+
+        .objection-navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.5em;
+            color: #007bff;
+        }
+
+        .objection-nav-btn {
+            cursor: pointer;
+            user-select: none;
+            padding: 5px;
+            transition: color 0.2s ease;
+        }
+
+        .objection-nav-btn:hover {
+            color: #0056b3;
+        }
+
+        .nav-counter {
+            font-size: 0.8em;
+            color: #777;
+        }
+        /* Стили для таблицы из docx */
+        #script-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        #script-content table, #script-content th, #script-content td {
+            border: 1px solid #ddd;
+            color: #333;
+        }
+        #script-content th, #script-content td {
+            padding: 8px;
+            text-align: left;
+        }
+        #script-content th {
+            font-weight: bold;
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="objections-column" id="objections-column">
+        <div class="buttons-grid" id="buttons-grid">Загрузка возражений...</div>
+    </div>
+
+    <div class="content-area">
+        <div class="header-section">
+            <header class="header">
+                <div class="logo-container">
+                    <img src="logo_twin-03.png" alt="Логотип Twin" class="logo-image">
+                </div>
+                <h1>ПЗМ ТВИН НОВАЯ ЭРА</h1>
+            </header>
+            <div class="instructions-box">
+                <p>Чтобы увидеть отработку, нажми на нужное возражение и выбери один из вариантов отработки.</p>
+            </div>
+        </div>
+        
+        <div class="script-column">
+            <div id="script-content">Загрузка скрипта...</div>
+        </div>
+    </div>
+
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="mammoth.browser.js"></script>
+
+    <script>
+        // === КОНФИГУРАЦИЯ GOOGLE SHEETS API ===
+        const API_KEY = 'AIzaSyCTNSHHusInzqyA8UdaudDfIqS1hSO9DmY';
+        const SPREADSHEET_ID = '1UYjX9X6UmCoCq2Y2HduPuP_Y_-OcYrljF7W-wcNrRdU';
+        const SPREADSHEET_RANGE = 'Sheet1!A:Z';
+        const DOCS_FILE = 'sk.docx';
+
+        // === ОСНОВНАЯ ЛОГИКА САЙТА ===
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchDocsContent();
+            gapi.load('client', initSheetsClient);
+        });
+
+        function initSheetsClient() {
+            gapi.client.init({
+                apiKey: API_KEY,
+                discoveryDocs: ["https://sheets.googleapis.com/$discovery/rest?version=v4"],
+            }).then(() => {
+                console.log('Google Sheets API client initialized successfully.');
+                fetchSheetsData();
+            }, (error) => {
+                console.error('Error initializing Google Sheets API client:', error);
+                document.getElementById('buttons-grid').innerHTML = 'Ошибка загрузки возражений.';
+            });
+        }
+
+        function fetchDocsContent() {
+            const scriptContentDiv = document.getElementById('script-content');
+            scriptContentDiv.innerText = 'Загрузка скрипта...';
+
+            fetch(DOCS_FILE)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Файл не найден или не удалось загрузить.');
+                    }
+                    return response.arrayBuffer();
+                })
+                .then(arrayBuffer => {
+                    return mammoth.convertToHtml({arrayBuffer: arrayBuffer});
+                })
+                .then(result => {
+                    scriptContentDiv.innerHTML = result.value;
+                })
+                .catch(error => {
+                    console.error('Ошибка обработки файла:', error);
+                    scriptContentDiv.innerText = `Ошибка загрузки файла ${DOCS_FILE}. Убедитесь, что он находится в той же папке и является файлом .docx.`;
+                });
+        }
+
+        function fetchSheetsData() {
+            gapi.client.sheets.spreadsheets.values.get({
+                spreadsheetId: SPREADSHEET_ID,
+                range: SPREADSHEET_RANGE,
+            }).then((response) => {
+                const data = response.result.values;
+                if (!data || data.length === 0) {
+                    document.getElementById('buttons-grid').innerHTML = 'Данные не найдены.';
+                    console.log('No data found.');
+                    return;
+                }
+                const objectionsData = data.slice(1);
+                createObjectionButtons(objectionsData);
+            }, (error) => {
+                console.error('Error fetching data from Google Sheets:', error);
+                document.getElementById('buttons-grid').innerHTML = 'Ошибка загрузки возражений.';
+            });
+        }
+
+        function createObjectionButtons(data) {
+            const gridContainer = document.getElementById('buttons-grid');
+            gridContainer.innerHTML = '';
+            data.forEach(row => {
+                const title = row[0];
+                const rebuttals = row.slice(1).filter(text => text && text.trim() !== '');
+                if (!title || rebuttals.length === 0) {
+                    return;
+                }
+                const button = document.createElement('div');
+                button.className = 'objection-button';
+                const titleElement = document.createElement('div');
+                titleElement.className = 'objection-title';
+                titleElement.textContent = title;
+                button.appendChild(titleElement);
+                const bodyElement = document.createElement('div');
+                bodyElement.className = 'objection-body';
+                let currentRebuttalIndex = 0;
+                function updateRebuttalDisplay(index) {
+                    if (rebuttals.length === 1) {
+                        bodyElement.innerHTML = `<div class="objection-text">${rebuttals[0]}</div>`;
+                        return;
+                    }
+                    const rebuttalText = rebuttals[index];
+                    const navHtml = `
+                        <div class="objection-navigation">
+                            <span class="objection-nav-btn prev-btn" data-dir="prev">&lt;</span>
+                            <span class="nav-counter">${index + 1} / ${rebuttals.length}</span>
+                            <span class="objection-nav-btn next-btn" data-dir="next">&gt;</span>
+                        </div>
+                        <div class="objection-text">${rebuttalText}</div>
+                    `;
+                    bodyElement.innerHTML = navHtml;
+                    bodyElement.querySelector('.objection-nav-btn[data-dir="prev"]').onclick = (e) => {
+                        e.stopPropagation();
+                        currentRebuttalIndex = (currentRebuttalIndex - 1 + rebuttals.length) % rebuttals.length;
+                        updateRebuttalDisplay(currentRebuttalIndex);
+                    };
+                    bodyElement.querySelector('.objection-nav-btn[data-dir="next"]').onclick = (e) => {
+                        e.stopPropagation();
+                        currentRebuttalIndex = (currentRebuttalIndex + 1) % rebuttals.length;
+                        updateRebuttalDisplay(currentRebuttalIndex);
+                    };
+                }
+                button.addEventListener('click', () => {
+                    document.querySelectorAll('.objection-button.active').forEach(activeButton => {
+                        if (activeButton !== button) {
+                            activeButton.classList.remove('active');
+                        }
+                    });
+                    button.classList.toggle('active');
+                    if (button.classList.contains('active')) {
+                        currentRebuttalIndex = 0;
+                        updateRebuttalDisplay(currentRebuttalIndex);
+                    }
+                });
+                button.appendChild(bodyElement);
+                gridContainer.appendChild(button);
+            });
+        }
+    </script>
+</body>
+</html>
