@@ -45,7 +45,7 @@
             position: absolute;
             top: 0;
             left: 5px;
-            right: 360px; /* Здесь я скорректировал значение, чтобы оставить 5px отступа от правого края */
+            right: 360px;
             bottom: 5px;
             display: flex;
             flex-direction: column;
@@ -56,12 +56,56 @@
         .header-section {
             background-color: #f4f7f9;
             padding-bottom: 1px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            display: flex; /* Изменено для расположения кнопок и хедера */
+            flex-direction: row; /* Изменено */
+            align-items: flex-start; /* Изменено */
+            gap: 20px; /* Добавлен отступ между кнопками и хедером */
             flex-shrink: 0;
         }
         
+        /* НОВЫЙ БЛОК: Стили для колонки выбора файла */
+        .file-selector-column {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding-top: 5px;
+        }
+
+        /* НОВЫЙ БЛОК: Стили для кнопок выбора файла */
+        .file-btn {
+            background-color: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px 15px;
+            text-align: center;
+            font-size: 0.9em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            color: #333;
+        }
+
+        .file-btn:hover {
+            border-color: #007bff;
+            color: #007bff;
+        }
+
+        .file-btn.active {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+            box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
+        }
+        
+        /* НОВЫЙ БЛОК: Обертка для старого хедера, чтобы он остался колонкой */
+        .header-content-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex-grow: 1; /* Чтобы занять оставшееся место */
+        }
+
         .header {
             display: flex;
             align-items: center;
@@ -88,7 +132,6 @@
             object-fit: contain;
         }
 
-        /* Стиль для надписи "Чтобы увидеть отработку..." в сером окошке */
         .instructions-box {
             background-color: #e0e0e0;
             border-radius: 8px;
@@ -225,14 +268,22 @@
 
     <div class="content-area">
         <div class="header-section">
-            <header class="header">
-                <div class="logo-container">
-                    <img src="logo_twin-03.png" alt="Логотип Twin" class="logo-image">
+            <div class="file-selector-column">
+                <button class="file-btn active" data-file="sk.docx">ПЗМ</button>
+                <button class="file-btn" data-file="pod.docx">Подтверждение</button>
+                <button class="file-btn" data-file="verb.docx">Вербализация</button>
+            </div>
+            
+            <div class="header-content-wrapper">
+                <header class="header">
+                    <div class="logo-container">
+                        <img src="logo_twin-03.png" alt="Логотип Twin" class="logo-image">
+                    </div>
+                    <h1>ПЗМ ТВИН НОВАЯ ЭРА</h1>
+                </header>
+                <div class="instructions-box">
+                    <p>Чтобы увидеть отработку, нажми на нужное возражение и выбери один из вариантов отработки.</p>
                 </div>
-                <h1>ПЗМ ТВИН НОВАЯ ЭРА</h1>
-            </header>
-            <div class="instructions-box">
-                <p>Чтобы увидеть отработку, нажми на нужное возражение и выбери один из вариантов отработки.</p>
             </div>
         </div>
         
@@ -249,11 +300,13 @@
         const API_KEY = 'AIzaSyCTNSHHusInzqyA8UdaudDfIqS1hSO9DmY';
         const SPREADSHEET_ID = '1UYjX9X6UmCoCq2Y2HduPuP_Y_-OcYrljF7W-wcNrRdU';
         const SPREADSHEET_RANGE = 'Sheet1!A:Z';
-        const DOCS_FILE = 'sk.docx';
+        // const DOCS_FILE = 'sk.docx'; // Эта строка больше не нужна
 
         // === ОСНОВНАЯ ЛОГИКА САЙТА ===
         document.addEventListener('DOMContentLoaded', () => {
-            fetchDocsContent();
+            // Загружаем скрипт по умолчанию и инициализируем API
+            fetchDocsContent('sk.docx');
+            setupFileButtons(); // Инициализируем наши новые кнопки
             gapi.load('client', initSheetsClient);
         });
 
@@ -269,12 +322,13 @@
                 document.getElementById('buttons-grid').innerHTML = 'Ошибка загрузки возражений.';
             });
         }
-
-        function fetchDocsContent() {
+        
+        // ИЗМЕНЕНА ФУНКЦИЯ: Теперь принимает имя файла как аргумент
+        function fetchDocsContent(fileName) {
             const scriptContentDiv = document.getElementById('script-content');
-            scriptContentDiv.innerText = 'Загрузка скрипта...';
+            scriptContentDiv.innerHTML = 'Загрузка скрипта...';
 
-            fetch(DOCS_FILE)
+            fetch(fileName)
                 .then(response => {
                     if (!response.ok) {
                         throw new Error('Файл не найден или не удалось загрузить.');
@@ -289,8 +343,28 @@
                 })
                 .catch(error => {
                     console.error('Ошибка обработки файла:', error);
-                    scriptContentDiv.innerText = `Ошибка загрузки файла ${DOCS_FILE}. Убедитесь, что он находится в той же папке и является файлом .docx.`;
+                    // Сообщение об ошибке теперь динамическое
+                    scriptContentDiv.innerText = `Ошибка загрузки файла ${fileName}. Убедитесь, что он находится в той же папке и является файлом .docx.`;
                 });
+        }
+        
+        // НОВАЯ ФУНКЦИЯ: Настройка обработчиков для кнопок выбора файла
+        function setupFileButtons() {
+            const fileButtons = document.querySelectorAll('.file-btn');
+            
+            fileButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // Убираем класс 'active' у всех кнопок
+                    fileButtons.forEach(btn => btn.classList.remove('active'));
+                    // Добавляем класс 'active' только что нажатой кнопке
+                    button.classList.add('active');
+                    
+                    // Получаем имя файла из data-атрибута
+                    const fileToLoad = button.dataset.file;
+                    // Загружаем и отображаем выбранный файл
+                    fetchDocsContent(fileToLoad);
+                });
+            });
         }
 
         function fetchSheetsData() {
